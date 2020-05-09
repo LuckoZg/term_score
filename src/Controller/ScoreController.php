@@ -10,6 +10,7 @@ class ScoreController
 {
     private $term_positive = ' rocks';
     private $term_negative = ' sucks';
+    private $factor = 10;
 
     private $providers_namespace = 'App\Provider\\';
     private $providers = array(
@@ -50,10 +51,12 @@ class ScoreController
 
             // Post/Update data to database in another thread (async)
 
-        return new JsonResponse(['term' => $term, 'positive_count' => $results['positive_count'], 'negative_count' => $results['negative_count']]);
+        return new JsonResponse(['term' => $term, 'score' => $score]);
     }
 
     private function get_full_score($results){
         // Implement algorithm for score from 1 - 10 based on positive and negative results.
+        $sum_count = $results['positive_count'] + $results['negative_count'];
+        return round((($results['positive_count'] / $sum_count) * $this->factor), 2);
     }
 }
