@@ -32,9 +32,9 @@ class ScoreController
             return new JsonResponse(['status' => $this->error_messages['provider_not_available']]);
         }
 
-        // Check if $term score is already saved into database
+        // Check if term score for provider is already saved into database
 
-        // Fetch data from external API
+        // Fetch data from provider
             $client = HttpClient::create();
 
             $provider_class = $this->providers_namespace.$this->providers[$provider];
@@ -48,7 +48,7 @@ class ScoreController
 
             $score = $this->get_full_score($results);
 
-            // Post/Update data to database
+            // Post/Update data to database in another thread (async)
 
         return new JsonResponse(['term' => $term, 'positive_count' => $results['positive_count'], 'negative_count' => $results['negative_count']]);
     }
