@@ -34,7 +34,7 @@ class ScoreController extends AbstractController
      */
     public function get_score(string $term, string $provider = 'github'): JsonResponse
     {
-        if(!isset($this->providers[$provider]) || !class_exists($this->providers_namespace.$this->providers[$provider])){
+        if(!$this->validate_provider($provider)){
             return new JsonResponse(
                 $data=['status_message' => $this->error_messages['provider_not_available']], 
                 $status=$this->status_codes['not_available']
@@ -53,7 +53,16 @@ class ScoreController extends AbstractController
         );
     }
 
-    private function get_score_from_database($term, $provider)
+    private function validate_provider($provider): bool
+    {
+        if(!isset($this->providers[$provider]) || !class_exists($this->providers_namespace.$this->providers[$provider])){
+            return false;
+        }
+
+        return true;
+    }
+
+    private function get_score_from_database($term, $provider): ?float
     {
         $repository = $this->getDoctrine()->getRepository(Term::class);
         $term = $repository->findOneBy([
