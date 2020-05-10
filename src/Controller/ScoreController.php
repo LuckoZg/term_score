@@ -2,11 +2,14 @@
 
 namespace App\Controller;
 
-use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpClient\HttpClient;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\Term;
 
-class ScoreController
+class ScoreController extends AbstractController
 {
     private $term_positive = ' rocks';
     private $term_negative = ' sucks';
@@ -31,7 +34,6 @@ class ScoreController
      */
     public function get_score(string $term, string $provider = 'github'): JsonResponse
     {
-        // Check if provider and provider class is defined
         if(!isset($this->providers[$provider]) || !class_exists($this->providers_namespace.$this->providers[$provider])){
             return new JsonResponse(
                 $data=['status_message' => $this->error_messages['provider_not_available']], 
@@ -39,18 +41,34 @@ class ScoreController
             );
         }
 
-        // Check if term score for provider is already saved into database
+        $score = $this->get_score_from_database($term, $provider);
 
-        // Fetch data from provider
-        $results = $this->get_results_from_provider($term, $provider);
-        $score = $this->get_full_score($results);
-
-        // Post/Update data to database in another thread (async)
+        if(!$score){
+            $results = $this->get_results_from_provider($term, $provider);
+            $score = $this->get_full_score($results);
+            $this->set_score_to_database($term, $provider, $score);
+        }
 
         return new JsonResponse(
             $data=['term' => $term, 'score' => $score], 
             $status=$this->status_codes['ok']
         );
+    }
+
+    private function get_score_from_database($term, $provider)
+    {
+        $repository = $this->getDoctrine()->getRepository(Term::class);
+        $term = $repository->findOneBy([
+            'name' => $term,
+            'provider' => $provider,
+        ]);
+
+        return $term ? $term->getScore() : NULL;
+    }
+
+    private function set_score_to_database($term, $provider, $score)
+    {
+        return;
     }
 
     private function get_results_from_provider($term, $provider): array
