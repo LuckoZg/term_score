@@ -41,6 +41,7 @@ class ScoreController extends AbstractController
             );
         }
 
+        $term = trim($term);
         $score = $this->get_score_from_database($term, $provider);
         if(!$score){
             $score = $this->get_score_from_provider($term, $provider);
