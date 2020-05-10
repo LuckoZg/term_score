@@ -10,7 +10,7 @@ class ScoreController
 {
     private $term_positive = ' rocks';
     private $term_negative = ' sucks';
-    private $factor = 10;
+    private $multiplier = 10;
 
     private $providers_namespace = 'App\Provider\\';
     private $providers = array(
@@ -21,6 +21,11 @@ class ScoreController
         'provider_not_available' => 'Provider is not available.'
     );
 
+    private $status_codes = array(
+        'ok' => 200,
+        'not_available' => 503
+    );
+
     /**
      * @Route("/score/{term}/{provider}", name="score", methods={"GET"})
      */
@@ -28,7 +33,10 @@ class ScoreController
     {
         // Check if provider and provider class is defined
         if(!isset($this->providers[$provider]) || !class_exists($this->providers_namespace.$this->providers[$provider])){
-            return new JsonResponse(['status_message' => $this->error_messages['provider_not_available']], $status=500);
+            return new JsonResponse(
+                $data=['status_message' => $this->error_messages['provider_not_available']], 
+                $status=$this->status_codes['not_available']
+            );
         }
 
         // Check if term score for provider is already saved into database
@@ -39,7 +47,10 @@ class ScoreController
 
         // Post/Update data to database in another thread (async)
 
-        return new JsonResponse(['term' => $term, 'score' => $score], $status=200);
+        return new JsonResponse(
+            $data=['term' => $term, 'score' => $score], 
+            $status=$this->status_codes['ok']
+        );
     }
 
     private function get_results_from_provider($term, $provider)
@@ -54,7 +65,7 @@ class ScoreController
     private function get_full_score($results)
     {
         $sum_count = $results['positive_count'] + $results['negative_count'];
-        $score = ($results['positive_count'] / $sum_count) * $this->factor;
+        $score = ($results['positive_count'] / $sum_count) * $this->multiplier;
 
         return round(($score), 2);
     }
