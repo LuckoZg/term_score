@@ -2,6 +2,7 @@
 
 namespace App\Provider;
 
+use Symfony\Component\Config\Definition\Exception\Exception;
 use App\Provider\Provider;
 
 class GitHubProvider extends Provider
@@ -14,13 +15,18 @@ class GitHubProvider extends Provider
         $api_url_positive = $this->url.$term.$term_positive;
         $api_url_negative = $this->url.$term.$term_negative;
 
-        // Get positive count for term
-        $response = $client->request('GET', $api_url_positive);
-        $positive_count = $response->toArray()['total_count'];
+        try {
+            // Get positive count for term
+            $response = $client->request('GET', $api_url_positive);
+            $positive_count = $response->toArray()['total_count'];
 
-        // Get negative count for term
-        $response = $client->request('GET', $api_url_negative);
-        $negative_count = $response->toArray()['total_count'];
+            // Get negative count for term
+            $response = $client->request('GET', $api_url_negative);
+            $negative_count = $response->toArray()['total_count'];
+        } catch(\Throwable $th){
+            // We should send json response with proper message (Override exception behaviour etc.).
+            throw new Exception('External API Error: '.$th->getMessage());
+        }
 
         return array('positive_count' => $positive_count, 'negative_count' => $negative_count);
     }
