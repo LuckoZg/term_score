@@ -2,7 +2,9 @@
 
 namespace App\Provider;
 
-class GitHubProvider
+use App\Provider\Provider;
+
+class GitHubProvider extends Provider
 {
     private $url = 'https://api.github.com/search/issues?q=';
 
