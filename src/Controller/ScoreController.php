@@ -42,10 +42,8 @@ class ScoreController extends AbstractController
         }
 
         $score = $this->get_score_from_database($term, $provider);
-
         if(!$score){
-            $results = $this->get_results_from_provider($term, $provider);
-            $score = $this->get_full_score($results);
+            $score = $this->get_score_from_provider($term, $provider);
             $this->set_score_to_database($term, $provider, $score);
         }
 
@@ -71,13 +69,14 @@ class ScoreController extends AbstractController
         return;
     }
 
-    private function get_results_from_provider($term, $provider): array
+    private function get_score_from_provider($term, $provider): float
     {
         $client = HttpClient::create();
         $provider_class = $this->providers_namespace.$this->providers[$provider];
         $provider = new $provider_class;
-        
-        return $provider->get_results($client, $term, $this->term_positive, $this->term_negative);
+        $results = $provider->get_results($client, $term, $this->term_positive, $this->term_negative);
+
+        return $this->get_full_score($results);
     }
 
     private function get_full_score($results): float
