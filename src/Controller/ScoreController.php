@@ -24,13 +24,13 @@ class ScoreController
     );
 
     /**
-     * @Route("/score/{term}/{provider}", name="score")
+     * @Route("/score/{term}/{provider}", name="score", methods={"GET"})
      */
     public function get_score(string $term, string $provider = 'github')
     {
         // Check if provider and provider class is defined
         if(!isset($this->providers[$provider]) || !class_exists($this->providers_namespace.$this->providers[$provider])){
-            return new JsonResponse(['status' => $this->error_messages['provider_not_available']]);
+            return new JsonResponse(['status_message' => $this->error_messages['provider_not_available']], $status=500);
         }
 
         // Check if term score for provider is already saved into database
@@ -44,19 +44,20 @@ class ScoreController
             try {
                 $results = $provider->get_results($client, $term, $this->term_positive, $this->term_negative);
             } catch (\Throwable $th) {
-                return new JsonResponse(['status' => $this->error_messages['provider_not_implemented']]);
+                return new JsonResponse(['status_message' => $this->error_messages['provider_not_implemented']], $status=500);
             }
 
             $score = $this->get_full_score($results);
 
             // Post/Update data to database in another thread (async)
 
-        return new JsonResponse(['term' => $term, 'score' => $score]);
+        return new JsonResponse(['term' => $term, 'score' => $score], $status=200);
     }
 
     private function get_full_score($results){
-        // Implement algorithm for score from 1 - 10 based on positive and negative results.
         $sum_count = $results['positive_count'] + $results['negative_count'];
-        return round((($results['positive_count'] / $sum_count) * $this->factor), 2);
+        $score = ($results['positive_count'] / $sum_count) * $this->factor;
+
+        return round(($score), 2);
     }
 }
