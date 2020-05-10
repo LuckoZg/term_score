@@ -29,7 +29,7 @@ class ScoreController
     /**
      * @Route("/score/{term}/{provider}", name="score", methods={"GET"})
      */
-    public function get_score(string $term, string $provider = 'github')
+    public function get_score(string $term, string $provider = 'github'): JsonResponse
     {
         // Check if provider and provider class is defined
         if(!isset($this->providers[$provider]) || !class_exists($this->providers_namespace.$this->providers[$provider])){
@@ -53,7 +53,7 @@ class ScoreController
         );
     }
 
-    private function get_results_from_provider($term, $provider)
+    private function get_results_from_provider($term, $provider): array
     {
         $client = HttpClient::create();
         $provider_class = $this->providers_namespace.$this->providers[$provider];
@@ -62,7 +62,7 @@ class ScoreController
         return $provider->get_results($client, $term, $this->term_positive, $this->term_negative);
     }
 
-    private function get_full_score($results)
+    private function get_full_score($results): float
     {
         $sum_count = $results['positive_count'] + $results['negative_count'];
         $score = ($results['positive_count'] / $sum_count) * $this->multiplier;
