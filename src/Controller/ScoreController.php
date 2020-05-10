@@ -14,19 +14,11 @@ class ScoreController extends AbstractController
     private $term_positive = ' rocks';
     private $term_negative = ' sucks';
     private $multiplier = 10;
+    private $db_result_expires = "+7 day";
 
     private $providers_namespace = 'App\Provider\\';
     private $providers = array(
         'github' => 'GitHubProvider'
-    );
-
-    private $error_messages = array(
-        'provider_not_available' => 'Provider is not available.'
-    );
-
-    private $status_codes = array(
-        'ok' => 200,
-        'not_available' => 503
     );
 
     /**
@@ -36,8 +28,8 @@ class ScoreController extends AbstractController
     {
         if(!$this->validate_provider($provider)){
             return new JsonResponse(
-                $data=['status_message' => $this->error_messages['provider_not_available']], 
-                $status=$this->status_codes['not_available']
+                $data=['status_message' => $this->getParameter('app.error_messages')['provider_not_available']], 
+                $status=JsonResponse::HTTP_SERVICE_UNAVAILABLE
             );
         }
 
@@ -50,7 +42,7 @@ class ScoreController extends AbstractController
 
         return new JsonResponse(
             $data=['term' => $term, 'score' => $score], 
-            $status=$this->status_codes['ok']
+            $status=JsonResponse::HTTP_OK
         );
     }
 
@@ -63,20 +55,16 @@ class ScoreController extends AbstractController
         return true;
     }
 
-    private function get_score_from_database($term, $provider): ?float
+    private function get_full_score($results): float
     {
-        $repository = $this->getDoctrine()->getRepository(Term::class);
-        $term = $repository->findOneBy([
-            'name' => $term,
-            'provider' => $provider,
-        ]);
+        $sum_count = $results['positive_count'] + $results['negative_count'];
+        if($sum_count == 0){
+            return round(($sum_count), 2);
+        }
 
-        return $term ? $term->getScore() : NULL;
-    }
+        $score = ($results['positive_count'] / $sum_count) * $this->multiplier;
 
-    private function set_score_to_database($term, $provider, $score)
-    {
-        return;
+        return round(($score), 2);
     }
 
     private function get_score_from_provider($term, $provider): float
@@ -89,11 +77,66 @@ class ScoreController extends AbstractController
         return $this->get_full_score($results);
     }
 
-    private function get_full_score($results): float
+    private function get_score_from_database($term, $provider): ?float
     {
-        $sum_count = $results['positive_count'] + $results['negative_count'];
-        $score = ($results['positive_count'] / $sum_count) * $this->multiplier;
+        $entityManager = $this->getDoctrine()->getManager();
+        $query = $entityManager->createQuery('
+            SELECT term
+            FROM App\Entity\Term term
+            WHERE term.name = ?1
+            AND term.provider = ?2
+            AND term.expires > ?3
+        ');
 
-        return round(($score), 2);
+        $query->setParameter(1, $term);
+        $query->setParameter(2, $provider);
+        $query->setParameter(3, gmdate('Y-m-d H:i:s'));
+        $term_from_db = $query->getOneOrNullResult();
+
+        return $term_from_db ? $term_from_db->getScore() : NULL;
+    }
+
+    private function set_score_to_database($term, $provider, $score): bool
+    {
+        $entityManager = $this->getDoctrine()->getManager();
+        $query = $entityManager->createQuery('
+            SELECT term
+            FROM App\Entity\Term term
+            WHERE term.name = ?1
+            AND term.provider = ?2
+        ');
+
+        $query->setParameter(1, $term);
+        $query->setParameter(2, $provider);
+        $term_from_db = $query->getOneOrNullResult();
+
+        if($term_from_db){
+            $this->update_term($entityManager, $term_from_db, $score);
+        } else {
+            $this->create_term($entityManager, $term, $provider, $score);
+        }
+
+        return true;
+    }
+
+    private function update_term($entityManager, $term_from_db, $score)
+    {
+        if($term_from_db->getExpires() > gmdate('Y-m-d H:i:s')){
+            $term_from_db->setScore($score);
+            $term_from_db->setExpires(new \DateTime(gmdate('Y-m-d H:i:s', strtotime($this->db_result_expires))));
+            $entityManager->flush();
+        }
+    }
+
+    private function create_term($entityManager, $term, $provider, $score)
+    {
+        $new_term = new Term();
+        $new_term->setName($term);
+        $new_term->setProvider($provider);
+        $new_term->setScore($score);
+        $new_term->setExpires(new \DateTime(gmdate('Y-m-d H:i:s', strtotime($this->db_result_expires))));
+
+        $entityManager->persist($new_term);
+        $entityManager->flush();
     }
 }
