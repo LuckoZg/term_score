@@ -17,11 +17,11 @@ $ composer install
 ```
 - Run command to create database and migrate table
 > Be sure that your MySQL server is up and running.
-- Create database
+1. Create database
  ```sh
 $ php bin/console doctrine:database:create
 ```
-- and then migrate
+2. and then migrate
  ```sh
 $ php bin/console doctrine:migrations:migrate
 ```
