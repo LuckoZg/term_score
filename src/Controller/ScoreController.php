@@ -119,11 +119,9 @@ class ScoreController extends AbstractController
 
     private function update_term($entityManager, $term_from_db, $score): void
     {
-        if($term_from_db->getExpires() > gmdate('Y-m-d H:i:s')){
-            $term_from_db->setScore($score);
-            $term_from_db->setExpires(new \DateTime(gmdate('Y-m-d H:i:s', strtotime($this->db_score_expires))));
-            $entityManager->flush();
-        }
+        $term_from_db->setScore($score);
+        $term_from_db->setExpires(new \DateTime(gmdate('Y-m-d H:i:s', strtotime($this->db_score_expires))));
+        $entityManager->flush();
     }
 
     private function create_term($entityManager, $term, $provider, $score): void
