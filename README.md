@@ -36,9 +36,9 @@ http://localhost:8000/
 
 # Usage Examples:
 - To find out how popular is php on GitHub call:
-    `/api/v1/score/php/`
+    - `/api/v1/score/php/`
     or
-    `/api/v1/score/php/github`
+    - `/api/v1/score/php/github`
 
     > Note: GitHub is default provider, so you don't need to explicitly call it.
 
@@ -51,9 +51,9 @@ http://localhost:8000/
 ```
 
 - Another call examples:
-    `/api/v1/score/java/`
-    `/api/v1/score/php/twitter` *
-    `/api/v1/score/js/stackoverflow` *
+    - `/api/v1/score/java/`
+    - `/api/v1/score/php/twitter` *
+    - `/api/v1/score/js/stackoverflow` *
 
 - \* Twitter and Stackoverflow are not implemented yet, so you will get this response (503 Service Not Available):
 ```json
@@ -106,4 +106,4 @@ http://localhost:8000/
 - Day 3: Start building our project (basic API endpoint) (10-12 hours)
 - Day 4: Refactor API endpoint and add database layer (10-12 hours)
 - Day 5: Build basic tests, README.md and comments (5-7 hours)
-Time of building: **30-40 hours**.
+> Time of building: **30-40 hours**.
