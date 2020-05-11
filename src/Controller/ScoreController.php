@@ -22,11 +22,11 @@ class ScoreController extends AbstractController
      * like GitHub or Twitter.
      * 
      * Example GET calls:
-     *  - /api/v1/php/
-     *  - /api/v1/php/twitter
+     *  - /api/v1/score/php/
+     *  - /api/v1/score/php/twitter
      * 
      * GitHub is default provider, so you don't need to explicitly call:
-     *  - /api/v1/php/github (but certainly you can do that)
+     *  - /api/v1/score/php/github (but certainly you can do that)
      * 
      * @Route("/score/{term}/{provider}", name="score", methods={"GET"})
      */
