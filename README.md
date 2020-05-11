@@ -11,9 +11,9 @@ returns score on scale from 1 - 10 for given term and platform.
 ```sh
 $ git clone https://github.com/LuckoZg/term_score.git .
 ```
-- Go to root of project and run composer install to install all vendors (dependencies)
+- Go to root of project and run `composer install` to install all vendors (packages)
 ```sh
-$ git clone https://github.com/LuckoZg/term_score.git .
+$ composer install
 ```
 - Run command to create database and migrate table
 > Be sure that your MySQL server is up and running.
