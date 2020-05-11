@@ -6,6 +6,8 @@
 parameters:
     router.request_context.scheme: 'https'
     asset.request_context.secure: true
+    app.error_messages:
+        provider_not_available: Provider is not available.
 
 services:
     # default configuration for services in *this* file
