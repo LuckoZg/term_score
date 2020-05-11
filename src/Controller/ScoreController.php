@@ -14,7 +14,7 @@ class ScoreController extends AbstractController
     private $term_positive = ' rocks';
     private $term_negative = ' sucks';
     private $multiplier = 10;
-    private $db_result_expires = "+7 day";
+    private $db_score_expires = "+7 day";
 
     private $providers_namespace = 'App\Provider\\';
     private $providers = array(
@@ -96,7 +96,7 @@ class ScoreController extends AbstractController
         return $term_from_db ? $term_from_db->getScore() : NULL;
     }
 
-    private function set_score_to_database($term, $provider, $score): bool
+    private function set_score_to_database($term, $provider, $score): void
     {
         $entityManager = $this->getDoctrine()->getManager();
         $query = $entityManager->createQuery('
@@ -115,26 +115,24 @@ class ScoreController extends AbstractController
         } else {
             $this->create_term($entityManager, $term, $provider, $score);
         }
-
-        return true;
     }
 
-    private function update_term($entityManager, $term_from_db, $score)
+    private function update_term($entityManager, $term_from_db, $score): void
     {
         if($term_from_db->getExpires() > gmdate('Y-m-d H:i:s')){
             $term_from_db->setScore($score);
-            $term_from_db->setExpires(new \DateTime(gmdate('Y-m-d H:i:s', strtotime($this->db_result_expires))));
+            $term_from_db->setExpires(new \DateTime(gmdate('Y-m-d H:i:s', strtotime($this->db_score_expires))));
             $entityManager->flush();
         }
     }
 
-    private function create_term($entityManager, $term, $provider, $score)
+    private function create_term($entityManager, $term, $provider, $score): void
     {
         $new_term = new Term();
         $new_term->setName($term);
         $new_term->setProvider($provider);
         $new_term->setScore($score);
-        $new_term->setExpires(new \DateTime(gmdate('Y-m-d H:i:s', strtotime($this->db_result_expires))));
+        $new_term->setExpires(new \DateTime(gmdate('Y-m-d H:i:s', strtotime($this->db_score_expires))));
 
         $entityManager->persist($new_term);
         $entityManager->flush();
