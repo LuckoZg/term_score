@@ -105,5 +105,5 @@ http://localhost:8000/
 - Day 2: Get familiar with Symfony framework and play around (3-5 hours)
 - Day 3: Start building our project (basic API endpoint) (10-12 hours)
 - Day 4: Refactor API endpoint and add database layer (10-12 hours)
-- Day 5: Build basic tests, README.md and comments (5-7 hours)
+- Day 5: Refactor, add README.md and comments (5-7 hours)
 > Time of building: **30-40 hours**.
