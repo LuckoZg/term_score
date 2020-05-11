@@ -24,7 +24,7 @@ class GitHubProvider extends Provider
             $response = $client->request('GET', $api_url_negative);
             $negative_count = $response->toArray()['total_count'];
         } catch(\Throwable $th){
-            // We should send json response with proper message (Override exception behaviour etc.).
+            // We should send json response with proper message (Override Exception response for example).
             throw new Exception('External API Error: '.$th->getMessage());
         }
 
