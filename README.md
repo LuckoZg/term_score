@@ -40,7 +40,7 @@ http://localhost:8000/
     or
     - `/api/v1/score/php/github`
 
-    > Note: GitHub is default provider, so you don't need to explicitly call it.
+> Note: GitHub is default provider, so you don't need to explicitly call it.
 
 - You will get JSON response (200 OK) with this body structure:
 ```json
