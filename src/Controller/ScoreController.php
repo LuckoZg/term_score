@@ -8,6 +8,7 @@ use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Term;
+use App\Factory\ProviderFactory;
 
 class ScoreController extends AbstractController
 {
@@ -15,11 +16,6 @@ class ScoreController extends AbstractController
     private $term_negative = ' sucks';
     private $multiplier = 10;
     private $db_score_expires = "+7 day";
-
-    private $providers_namespace = 'App\Provider\\';
-    private $providers = array(
-        'github' => 'GitHubProvider'
-    );
 
     /**
      * @Route("/score/{term}/{provider}", name="score", methods={"GET"})
@@ -48,7 +44,7 @@ class ScoreController extends AbstractController
 
     private function validate_provider($provider): bool
     {
-        if(!isset($this->providers[$provider]) || !class_exists($this->providers_namespace.$this->providers[$provider])){
+        if(!isset(ProviderFactory::providers[$provider]) || !class_exists(ProviderFactory::get_provider_class($provider))){
             return false;
         }
 
@@ -70,8 +66,7 @@ class ScoreController extends AbstractController
     private function get_score_from_provider($term, $provider): float
     {
         $client = HttpClient::create();
-        $provider_class = $this->providers_namespace.$this->providers[$provider];
-        $provider = new $provider_class;
+        $provider = ProviderFactory::get_provider_instance($provider);
         $results = $provider->get_results($client, $term, $this->term_positive, $this->term_negative);
 
         return $this->get_full_score($results);
