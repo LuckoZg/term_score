@@ -75,7 +75,7 @@ http://localhost:8000/
 ```
 
 - Create new file `src/Provider/<name_of_provider>Provider.php`
-- Implement `src/Provider/Provider.php` abstract class which gives you rules of what attributes and methods you need to implement for your provider.
+- Extend `src/Provider/Provider.php` abstract class which gives you rules of what attributes and methods you need to implement for your provider.
 - After you finish a coding of class, you can query results on:
     `/api/v1/score/{term}/{new_provider}`
 
@@ -96,6 +96,7 @@ http://localhost:8000/
 - Build CI/CD.
 - Implement Throttling on API endpoint.
 - Create two more tables in SQL for terms and providers, and set relations with main table (if we keep database layer).
+- Move select, update and post queries from ScoreController to TermRepository. 
 - Implement Exception subclass which returns JSON response on Exception.
 - Implement Logger.
 - Dockerize.
